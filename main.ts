@@ -76,6 +76,7 @@ let raisePlayer = 0
 let tileHeightWidthRatio = 0
 let playerSpeed = 0
 let moveSlopesAfterPlayerPast = 0
+game.splash("Press B to jump.")
 let gravity = 400
 let tileWidth = 16
 let tileHeight = 5
