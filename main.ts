@@ -1,5 +1,7 @@
 namespace SpriteKind {
     export const UphillSlope = SpriteKind.create()
+    export const Ground = SpriteKind.create()
+    export const DownhillSlope = SpriteKind.create()
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (!(jumping)) {
@@ -14,95 +16,189 @@ function moveSlopes () {
         value.vx = 0
         value.vy = 0
     }
+    for (let value of sprites.allOfKind(SpriteKind.Ground)) {
+        value.vx = 0
+        value.vy = 0
+    }
+    for (let value of sprites.allOfKind(SpriteKind.DownhillSlope)) {
+        value.vx = 0
+        value.vy = 0
+    }
     if (princess.right >= moveSlopesAfterPlayerPast) {
         princess.right = moveSlopesAfterPlayerPast
         if (princess.vx > 0) {
             slopeSpeedX = playerSpeed * -1
-            slopeSpeedY = tileHeightWidthRatio * Math.abs(slopeSpeedX)
-            for (let index = 0; index <= uphillTiles.length - 1; index++) {
-                previousTile = uphillTiles[index]
-                previousTile.vx = slopeSpeedX
-                previousTile.vy = slopeSpeedY
-                if (index + 1 < uphillTiles.length) {
-                    nextUphillTile = uphillTiles[index + 1]
-                    nextUphillTile.left = previousTile.right
-                    nextUphillTile.bottom = previousTile.top
-                }
+            if (onUphillSlope) {
+                slopeSpeedY = tileHeightWidthRatio * Math.abs(slopeSpeedX)
+            } else if (onDownhillSlope) {
+                slopeSpeedY = tileHeightWidthRatio * slopeSpeedX
+            } else {
+                slopeSpeedY = 0
+            }
+            for (let value of uphillTiles) {
+                value.vx = slopeSpeedX
+                value.vy = slopeSpeedY
+            }
+            for (let value of groundTiles) {
+                value.vx = slopeSpeedX
+                value.vy = slopeSpeedY
+            }
+            for (let value of downhillTiles) {
+                value.vx = slopeSpeedX
+                value.vy = slopeSpeedY
             }
         }
     }
 }
 function checkSlopePieces () {
     for (let value2 of sprites.allOfKind(SpriteKind.UphillSlope)) {
-        if (value2.right < 0 && value2.top > scene.screenHeight()) {
+        if (value2.right < 0) {
             uphillTiles.removeAt(uphillTiles.indexOf(value2))
             value2.destroy()
-            uphillTile = sprites.create(uphillImage, SpriteKind.UphillSlope)
-            uphillTile.bottom = lastBottom
-            uphillTile.left = lastLeft
-            uphillTiles.push(uphillTile)
+        }
+    }
+    for (let value2 of sprites.allOfKind(SpriteKind.Ground)) {
+        if (value2.right < 0) {
+            groundTiles.removeAt(groundTiles.indexOf(value2))
+            value2.destroy()
+        }
+    }
+    for (let value2 of sprites.allOfKind(SpriteKind.DownhillSlope)) {
+        if (value2.right < 0) {
+            downhillTiles.removeAt(downhillTiles.indexOf(value2))
+            value2.destroy()
         }
     }
 }
-function checkPlayerOnSlope () {
-    onSlope = false
+function checkPlayerOnGround () {
+    onUphillSlope = false
+    onGround = false
+    onDownhillSlope = false
     for (let value3 of sprites.allOfKind(SpriteKind.UphillSlope)) {
         if (princess.overlapsWith(value3)) {
-            onSlope = true
+            onUphillSlope = true
             jumping = false
             princess.y += raisePlayer
             princess.vy = 0
+            princess.ay = 0
+            while (princess.overlapsWith(value3)) {
+                princess.y += raisePlayer
+            }
         }
     }
-    if (onSlope) {
+    for (let value3 of sprites.allOfKind(SpriteKind.Ground)) {
+        if (princess.overlapsWith(value3)) {
+            onGround = true
+            jumping = false
+            princess.bottom = value3.top
+            princess.ay = 0
+            princess.vy = 0
+            while (princess.overlapsWith(value3)) {
+                princess.bottom = value3.top
+            }
+        }
+    }
+    for (let value3 of sprites.allOfKind(SpriteKind.DownhillSlope)) {
+        if (princess.overlapsWith(value3)) {
+            onDownhillSlope = true
+            jumping = false
+            princess.y += raisePlayer
+            princess.ay = 0
+            princess.vy = 0
+            while (princess.overlapsWith(value3)) {
+                princess.y += raisePlayer
+            }
+        }
+    }
+    if (princess.vx == 0 && !(jumping)) {
         princess.say("on slope")
+        princess.vy = 0
+        princess.ay = 0
     } else {
         princess.say("jumping")
+        princess.ay = gravity
     }
 }
-let nextUphillTile: Sprite = null
-let previousTile: Sprite = null
 let slopeSpeedY = 0
 let slopeSpeedX = 0
 let princess: Sprite = null
-let lastBottom = 0
-let lastLeft = 0
+let downhillTile: Sprite = null
+let groundTile: Sprite = null
 let uphillTile: Sprite = null
+let lastBottom = 0
+let downhillTiles: Sprite[] = []
+let groundTiles: Sprite[] = []
 let uphillTiles: Sprite[] = []
-let uphillImage: Image = null
-let onSlope = false
+let onDownhillSlope = false
+let onGround = false
+let onUphillSlope = false
 let jumping = false
 let raisePlayer = 0
 let tileHeightWidthRatio = 0
 let playerSpeed = 0
 let moveSlopesAfterPlayerPast = 0
+let gravity = 0
 game.splash("Press B to jump.")
-let gravity = 400
+gravity = 400
 let tileWidth = 16
 let tileHeight = 5
-moveSlopesAfterPlayerPast = 40
+moveSlopesAfterPlayerPast = scene.screenWidth() * 0.45
 playerSpeed = 50
 tileHeightWidthRatio = tileHeight / tileWidth
 let tileWidthHeightRatio = tileWidth / tileHeight
 raisePlayer = tileHeightWidthRatio * -1 * 2
-jumping = false
-onSlope = true
-uphillImage = img`
+jumping = true
+onUphillSlope = false
+onGround = false
+onDownhillSlope = false
+let uphillImage = img`
     . . . . . . . . . . . . . . 2 2 
     . . . . . . . . . . 2 2 2 2 2 2 
     . . . . . . 2 2 2 2 2 2 2 2 2 2 
     . . 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
     2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
     `
+let groundImage = img`
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    `
+let downhillImage = img`
+    2 2 . . . . . . . . . . . . . . 
+    2 2 2 2 2 2 . . . . . . . . . . 
+    2 2 2 2 2 2 2 2 2 2 . . . . . . 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 . . 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    `
 let totalTilesWide = scene.screenWidth() / tileWidth
 uphillTiles = []
-for (let index2 = 0; index2 <= totalTilesWide + (tileWidthHeightRatio + 1); index2++) {
-    uphillTile = sprites.create(uphillImage, SpriteKind.UphillSlope)
-    lastLeft = 0 + index2 * tileWidth
-    uphillTile.left = lastLeft
+groundTiles = []
+downhillTiles = []
+let lastRight = tileWidth
+for (let index2 = 0; index2 <= totalTilesWide / 1; index2++) {
     lastBottom = scene.screenHeight() - index2 * tileHeight
+    uphillTile = sprites.create(uphillImage, SpriteKind.UphillSlope)
+    uphillTile.right = lastRight
     uphillTile.bottom = lastBottom
+    lastRight = lastRight + tileWidth
     uphillTiles.push(uphillTile)
+}
+for (let index2 = 0; index2 <= totalTilesWide / 2; index2++) {
+    groundTile = sprites.create(groundImage, SpriteKind.Ground)
+    groundTile.right = lastRight
+    groundTile.bottom = lastBottom
+    lastRight = lastRight + tileWidth
+    groundTiles.push(groundTile)
+}
+for (let index2 = 0; index2 <= totalTilesWide / 1; index2++) {
+    downhillTile = sprites.create(downhillImage, SpriteKind.DownhillSlope)
+    downhillTile.right = lastRight
+    downhillTile.bottom = lastBottom
+    lastRight = lastRight + tileWidth
+    lastBottom = lastBottom + tileHeight
+    downhillTiles.push(downhillTile)
 }
 princess = sprites.create(img`
     . . . . . . . . . . . . . . . . 
@@ -128,7 +224,7 @@ princess.left = 0
 princess.bottom = scene.screenHeight() - tileHeight
 controller.moveSprite(princess, playerSpeed, 0)
 game.onUpdate(function () {
-    checkPlayerOnSlope()
+    checkPlayerOnGround()
     moveSlopes()
     checkSlopePieces()
 })
