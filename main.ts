@@ -110,12 +110,10 @@ function checkPlayerOnGround () {
             }
         }
     }
-    if (princess.vx == 0 && !(jumping)) {
-        princess.say("on slope")
+    if (princess.vx == 0 && !(jumping) || onGround) {
         princess.vy = 0
         princess.ay = 0
     } else {
-        princess.say("jumping")
         princess.ay = gravity
     }
 }
