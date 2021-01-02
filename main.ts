@@ -123,9 +123,8 @@ let slopeSpeedY = 0
 let slopeSpeedX = 0
 let princess: Sprite = null
 let downhillTile: Sprite = null
-let groundTile: Sprite = null
 let uphillTile: Sprite = null
-let lastBottom = 0
+let groundTile: Sprite = null
 let downhillTiles: Sprite[] = []
 let groundTiles: Sprite[] = []
 let uphillTiles: Sprite[] = []
@@ -177,14 +176,24 @@ uphillTiles = []
 groundTiles = []
 downhillTiles = []
 let lastRight = tileWidth
+let lastBottom = scene.screenHeight() - tileHeight
+for (let index2 = 0; index2 <= totalTilesWide / 2; index2++) {
+    groundTile = sprites.create(groundImage, SpriteKind.Ground)
+    groundTile.right = lastRight
+    groundTile.bottom = lastBottom
+    lastRight = lastRight + tileWidth
+    groundTiles.push(groundTile)
+}
+lastBottom = lastBottom - tileHeight
 for (let index2 = 0; index2 <= totalTilesWide / 1; index2++) {
-    lastBottom = scene.screenHeight() - index2 * tileHeight
     uphillTile = sprites.create(uphillImage, SpriteKind.UphillSlope)
     uphillTile.right = lastRight
     uphillTile.bottom = lastBottom
     lastRight = lastRight + tileWidth
     uphillTiles.push(uphillTile)
+    lastBottom = lastBottom - tileHeight
 }
+lastBottom = lastBottom + tileHeight
 for (let index2 = 0; index2 <= totalTilesWide / 2; index2++) {
     groundTile = sprites.create(groundImage, SpriteKind.Ground)
     groundTile.right = lastRight
