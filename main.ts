@@ -116,6 +116,7 @@ function checkPlayerOnGround () {
     } else {
         princess.ay = gravity
     }
+    princess.say("" + princess.bottom)
 }
 let slopeSpeedY = 0
 let slopeSpeedX = 0
@@ -137,75 +138,232 @@ let moveSlopesAfterPlayerPast = 0
 let gravity = 0
 game.splash("Press B to jump.")
 gravity = 400
-let tileWidth = 16
-let tileHeight = 5
+let slopeWidth = 16
+let slopeHeight = 5
 moveSlopesAfterPlayerPast = scene.screenWidth() * 0.45
-playerSpeed = 50
-tileHeightWidthRatio = tileHeight / tileWidth
-let tileWidthHeightRatio = tileWidth / tileHeight
+playerSpeed = 100
+tileHeightWidthRatio = slopeHeight / slopeWidth
+let tileWidthHeightRatio = slopeWidth / slopeHeight
 raisePlayer = tileHeightWidthRatio * -1 * 2
 jumping = true
 onUphillSlope = false
 onGround = false
 onDownhillSlope = false
 let uphillImage = img`
-    . . . . . . . . . . . . . . 2 2 
-    . . . . . . . . . . 2 2 2 2 2 2 
-    . . . . . . 2 2 2 2 2 2 2 2 2 2 
-    . . 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    ..............22
+    ..........222222
+    ......2222222222
+    ..22222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
     `
 let groundImage = img`
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
     `
 let downhillImage = img`
-    2 2 . . . . . . . . . . . . . . 
-    2 2 2 2 2 2 . . . . . . . . . . 
-    2 2 2 2 2 2 2 2 2 2 . . . . . . 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 . . 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    22..............
+    222222..........
+    2222222222......
+    22222222222222..
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
+    2222222222222222
     `
-let totalTilesWide = scene.screenWidth() / tileWidth
+let totalTilesWide = scene.screenWidth() / slopeWidth
 uphillTiles = []
 groundTiles = []
 downhillTiles = []
-let lastRight = tileWidth
-let lastBottom = scene.screenHeight() - tileHeight
-for (let index2 = 0; index2 <= totalTilesWide / 2; index2++) {
+let lastRight = slopeWidth
+let lastTop = scene.screenHeight() - slopeHeight
+for (let index2 = 0; index2 <= totalTilesWide / 1; index2++) {
     groundTile = sprites.create(groundImage, SpriteKind.Ground)
     groundTile.right = lastRight
-    groundTile.bottom = lastBottom
-    lastRight = lastRight + tileWidth
+    groundTile.top = lastTop
+    lastRight = lastRight + slopeWidth
     groundTiles.push(groundTile)
 }
-lastBottom = lastBottom - tileHeight
-for (let index2 = 0; index2 <= totalTilesWide / 1; index2++) {
+lastTop = lastTop - slopeHeight
+for (let index2 = 0; index2 <= totalTilesWide * 3; index2++) {
     uphillTile = sprites.create(uphillImage, SpriteKind.UphillSlope)
     uphillTile.right = lastRight
-    uphillTile.bottom = lastBottom
-    lastRight = lastRight + tileWidth
+    uphillTile.top = lastTop
+    lastRight = lastRight + slopeWidth
     uphillTiles.push(uphillTile)
-    lastBottom = lastBottom - tileHeight
+    lastTop = lastTop - slopeHeight
 }
-lastBottom = lastBottom + tileHeight
-for (let index2 = 0; index2 <= totalTilesWide / 2; index2++) {
+lastTop = lastTop + slopeHeight
+for (let index2 = 0; index2 <= totalTilesWide / 1; index2++) {
     groundTile = sprites.create(groundImage, SpriteKind.Ground)
     groundTile.right = lastRight
-    groundTile.bottom = lastBottom
-    lastRight = lastRight + tileWidth
+    groundTile.top = lastTop
+    lastRight = lastRight + slopeWidth
     groundTiles.push(groundTile)
 }
-for (let index2 = 0; index2 <= totalTilesWide / 1; index2++) {
+for (let index2 = 0; index2 <= totalTilesWide * 3; index2++) {
     downhillTile = sprites.create(downhillImage, SpriteKind.DownhillSlope)
     downhillTile.right = lastRight
-    downhillTile.bottom = lastBottom
-    lastRight = lastRight + tileWidth
-    lastBottom = lastBottom + tileHeight
+    downhillTile.top = lastTop
+    lastRight = lastRight + slopeWidth
+    lastTop = lastTop + slopeHeight
     downhillTiles.push(downhillTile)
+}
+for (let index2 = 0; index2 <= totalTilesWide / 1; index2++) {
+    groundTile = sprites.create(groundImage, SpriteKind.Ground)
+    groundTile.right = lastRight
+    groundTile.top = lastTop
+    lastRight = lastRight + slopeWidth
+    groundTiles.push(groundTile)
 }
 princess = sprites.create(img`
     . . . . . . . . . . . . . . . . 
@@ -228,7 +386,7 @@ princess = sprites.create(img`
 princess.setFlag(SpriteFlag.StayInScreen, true)
 princess.ay = gravity
 princess.left = 0
-princess.bottom = scene.screenHeight() - tileHeight
+princess.bottom = groundTiles[0].top
 controller.moveSprite(princess, playerSpeed, 0)
 game.onUpdate(function () {
     checkPlayerOnGround()
